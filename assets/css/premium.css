@@ -1025,3 +1025,32 @@ body.has-scrolled .scene-rail { opacity:1; transform:translate3d(0,-50%,0); }
 @media (prefers-reduced-motion:reduce) {
   body.has-scrolled .scene-rail { display:none; }
 }
+
+
+/* Live particle field in the hero: a signature detail, not a full-screen effect. */
+.hero-particles {
+  position:absolute;
+  z-index:2;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:.82;
+  mix-blend-mode:screen;
+}
+.scene-rail {
+  visibility:hidden;
+  transition:opacity .5s var(--ease-out),transform .5s var(--ease-out),visibility 0s linear .5s;
+}
+.scene-rail.is-visible {
+  visibility:visible;
+  transition:opacity .5s var(--ease-out),transform .5s var(--ease-out),visibility 0s;
+}
+@media (max-width:760px) {
+  .hero-particles { opacity:.5; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .hero-particles { display:none; }
+  .scene-rail.is-visible { visibility:hidden; }
+}
