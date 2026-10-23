@@ -524,3 +524,75 @@ html[data-motion="ready"] [data-reveal].is-visible{opacity:1;transform:translate
   .moment-scene{min-height:310px}
   .phone-screen{min-height:285px}
 }
+
+
+/* Responsive fit: two columns only when both panels have real room. */
+@media(min-width:1081px){
+  .project-copy,
+  .project-visual{
+    height:clamp(560px,46vw,620px);
+    min-height:clamp(560px,46vw,620px);
+  }
+}
+@media(max-width:1080px){
+  .project{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"copy" "visual";
+  }
+  .project-copy{
+    height:510px;
+    min-height:510px;
+    padding:30px;
+  }
+  .project-visual{
+    height:520px;
+    min-height:520px;
+  }
+  .project-overline{margin:25px 0 10px}
+  .project-description{margin-top:15px}
+  .project-proof{margin:18px 0 20px}
+  .scam-tags{margin:18px 0 20px}
+  .project-copy--momentwise .project-overline{margin-top:20px}
+  .project-copy--momentwise h3{font-size:clamp(42px,6vw,58px)}
+  .project-copy--momentwise .project-description{margin-top:12px;font-size:12px;line-height:1.7}
+  .project-copy--momentwise .moment-principles{gap:5px;margin:12px 0}
+  .project-copy--momentwise .project-text-link{margin-top:8px}
+  .project-copy--momentwise .moment-status-note{margin-top:8px}
+  .moment-scene{min-height:clamp(320px,42vw,380px)}
+  .phone-screen{min-height:clamp(300px,35vw,350px);padding:14px 12px 14px}
+  .moment-sun{margin:20px 0 16px}
+}
+@media(max-width:760px){
+  .project-copy{
+    height:auto;
+    min-height:480px;
+    padding:24px 22px 26px;
+  }
+  .project-visual{
+    height:420px;
+    min-height:420px;
+  }
+  .project-overline{margin:25px 0 10px}
+  .project-description{margin-top:15px}
+  .project-proof{margin:18px 0 20px}
+  .scam-tags{margin:18px 0 20px}
+  .project-copy--momentwise{padding-bottom:18px}
+  .project-copy--momentwise .project-overline{margin-top:24px}
+  .project-copy--momentwise h3{font-size:clamp(43px,11vw,67px)}
+  .project-copy--momentwise .project-description{margin-top:14px;font-size:12px;line-height:1.8}
+  .project-copy--momentwise .moment-principles{gap:6px;margin:14px 0 16px}
+  .project-copy--momentwise .project-text-link{margin-top:9px}
+  .project-copy--momentwise .moment-status-note{margin-top:8px}
+  .moment-scene{min-height:330px}
+  .phone-screen{min-height:300px;padding:14px 12px 14px}
+  .moment-sun{width:52px;height:52px;margin:19px 0 16px}
+  .phone-screen h4{font-size:27px;margin:7px 0 8px}
+  .phone-screen p{margin-bottom:12px}
+  .phone-action{padding:8px;margin-top:5px}
+}
+@media(max-width:375px){
+  .project-copy{padding:22px 18px 24px;min-height:480px}
+  .project-visual{height:400px;min-height:400px}
+  .moment-scene{min-height:310px}
+  .phone-screen{min-height:285px}
+}
