@@ -1,5 +1,4 @@
 (() => {
-  const root = document.documentElement;
   const body = document.body;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -11,13 +10,11 @@
   body.prepend(progress);
 
   let scrollQueued = false;
-  let lastScrollY = window.scrollY;
   const updateScrollUI = () => {
     const doc = document.documentElement;
     const maxScroll = doc.scrollHeight - window.innerHeight;
     progress.style.transform = 'scaleX(' + (maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0) + ')';
     body.classList.toggle('has-scrolled', window.scrollY > 18);
-    lastScrollY = window.scrollY;
     scrollQueued = false;
   };
   const queueScrollUI = () => {
@@ -87,6 +84,11 @@
     rail.append(link);
   });
   body.append(rail);
+  const updateRailVisibility = () => {
+    rail.classList.toggle('is-visible', window.scrollY > Math.min(420, window.innerHeight * .48));
+  };
+  window.addEventListener('scroll', updateRailVisibility, { passive: true });
+  updateRailVisibility();
 
   if ('IntersectionObserver' in window && railData.length) {
     const sectionObserver = new IntersectionObserver((entries) => {
@@ -194,6 +196,44 @@
       heroArt.style.setProperty('--parallax-y', '0px');
     });
   }
+
+  // Low-amplitude scroll parallax: four elements, one scheduled frame, transform-only.
+  const scrollScenes = [...document.querySelectorAll('.project-visual')].map((visual) => ({
+    visual,
+    scene: visual.querySelector('.toolkit-scene, .scam-scene, .moment-scene')
+  })).filter((item) => item.scene);
+  let parallaxFrame = 0;
+  const updateParallax = () => {
+    parallaxFrame = 0;
+    if (document.hidden) return;
+    if (heroArt) {
+      const rect = heroArt.getBoundingClientRect();
+      const offset = rect.bottom < -40 || rect.top > window.innerHeight + 40
+        ? 0
+        : Math.max(-22, Math.min(26, -rect.top * .035));
+      heroArt.style.setProperty('--scroll-y', offset.toFixed(2) + 'px');
+    }
+    scrollScenes.forEach(({ visual, scene }) => {
+      const rect = visual.getBoundingClientRect();
+      if (rect.bottom < -60 || rect.top > window.innerHeight + 60) {
+        scene.style.setProperty('--scroll-y', '0px');
+        return;
+      }
+      const centre = rect.top + rect.height * .5;
+      const offset = Math.max(-9, Math.min(9, (window.innerHeight * .56 - centre) * .018));
+      scene.style.setProperty('--scroll-y', offset.toFixed(2) + 'px');
+    });
+  };
+  const queueParallax = () => {
+    if (parallaxFrame) return;
+    parallaxFrame = window.requestAnimationFrame(updateParallax);
+  };
+  window.addEventListener('scroll', queueParallax, { passive: true });
+  window.addEventListener('resize', queueParallax, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) queueParallax();
+  });
+  queueParallax();
 
   if (finePointer) {
     document.querySelectorAll('.project-visual').forEach((visual) => {
