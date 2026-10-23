@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-<title>Nawz mark</title>
-<rect x="1" y="1" width="62" height="62" rx="16" fill="#171a16" stroke="#343d30" stroke-width="1.5"/>
-<path d="M18 46V18L46 46V18" fill="none" stroke="#f4f3ed" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M39 47.5 49 37.5" fill="none" stroke="#d5ff68" stroke-width="5" stroke-linecap="round"/>
-<circle cx="49" cy="18" r="2.5" fill="#d5ff68"/>
+<title id="title">Nawz signature mark</title>
+<rect x="1" y="1" width="62" height="62" rx="15" fill="#171a16" stroke="#30392c" stroke-width="1.4"/>
+<g fill="#f4f3ed"><rect x="13" y="16" width="8.5" height="32"/><path d="M18 16h9l23 25v8h-9L18 24z"/><rect x="41.5" y="26" width="8.5" height="22"/></g>
+<path d="M40 9H52V16.5L40 24Z" fill="#d5ff68"/>
 </svg>
