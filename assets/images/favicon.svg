@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="3" fill="#17151d"/><path d="M13 49V15h10l18 22V15h10v34H41L23 27v22z" fill="#f2efe7"/><path d="M41 49h10v-10z" fill="#ff563d"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+<title>Nawz mark</title>
+<rect x="1" y="1" width="62" height="62" rx="16" fill="#171a16" stroke="#343d30" stroke-width="1.5"/>
+<path d="M18 46V18L46 46V18" fill="none" stroke="#f4f3ed" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M39 47.5 49 37.5" fill="none" stroke="#d5ff68" stroke-width="5" stroke-linecap="round"/>
+<circle cx="49" cy="18" r="2.5" fill="#d5ff68"/>
+</svg>
