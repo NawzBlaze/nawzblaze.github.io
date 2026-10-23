@@ -596,3 +596,16 @@ html[data-motion="ready"] [data-reveal].is-visible{opacity:1;transform:translate
   .moment-scene{min-height:310px}
   .phone-screen{min-height:285px}
 }
+
+@media(max-width:760px){
+  .project-copy--momentwise{
+    height:480px;
+    min-height:480px;
+    padding-bottom:12px;
+  }
+  .project-copy--momentwise .project-overline{margin-top:20px}
+  .project-copy--momentwise .project-description{line-height:1.65}
+  .project-copy--momentwise .moment-principles{margin:10px 0 12px}
+  .project-copy--momentwise .project-text-link{margin-top:6px}
+  .project-copy--momentwise .moment-status-note{margin-top:6px}
+}
