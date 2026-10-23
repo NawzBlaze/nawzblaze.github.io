@@ -183,6 +183,141 @@
   };
 
   const heroArt = document.querySelector('.hero-art');
+  // Interactive canvas constellation. Only runs while the hero art is on screen,
+  // pauses in background tabs, caps pixel density, and uses no external libraries.
+  if (heroArt && 'getContext' in document.createElement('canvas')) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'hero-particles';
+    canvas.setAttribute('aria-hidden', 'true');
+    const context = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    if (context) {
+      heroArt.prepend(canvas);
+      let particles = [];
+      let canvasWidth = 0;
+      let canvasHeight = 0;
+      let particleFrame = 0;
+      let visible = false;
+      let pointerX = -1000;
+      let pointerY = -1000;
+      let previousTime = 0;
+
+      const resizeCanvas = () => {
+        const rect = heroArt.getBoundingClientRect();
+        const dpr = Math.min(1.4, window.devicePixelRatio || 1);
+        canvasWidth = Math.max(1, rect.width);
+        canvasHeight = Math.max(1, rect.height);
+        canvas.width = Math.round(canvasWidth * dpr);
+        canvas.height = Math.round(canvasHeight * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.max(20, Math.min(48, Math.round(canvasWidth * canvasHeight / 7600)));
+        particles = Array.from({ length: count }, (_, index) => ({
+          x: Math.random() * canvasWidth,
+          y: Math.random() * canvasHeight,
+          vx: (Math.random() - .5) * .012,
+          vy: (Math.random() - .5) * .012,
+          radius: index % 7 === 0 ? 1.8 : .75 + Math.random() * .65,
+          tone: index % 6 === 0 ? 1 : 0
+        }));
+        if (visible) scheduleParticles();
+      };
+
+      const drawParticles = (time) => {
+        particleFrame = 0;
+        if (!visible || document.hidden || !context) return;
+        const dt = previousTime ? Math.min(32, time - previousTime) : 16;
+        previousTime = time;
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        const points = [];
+
+        particles.forEach((particle) => {
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          if (particle.x < -8) particle.x = canvasWidth + 8;
+          if (particle.x > canvasWidth + 8) particle.x = -8;
+          if (particle.y < -8) particle.y = canvasHeight + 8;
+          if (particle.y > canvasHeight + 8) particle.y = -8;
+
+          let x = particle.x;
+          let y = particle.y;
+          const dx = x - pointerX;
+          const dy = y - pointerY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 115 && dist > 0.1) {
+            const push = (1 - dist / 115) * 10;
+            x += (dx / dist) * push;
+            y += (dy / dist) * push;
+          }
+          points.push({ x, y, particle });
+        });
+
+        for (let i = 0; i < points.length; i++) {
+          const a = points[i];
+          for (let j = i + 1; j < points.length; j++) {
+            const b = points[j];
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 92) continue;
+            const alpha = (1 - dist / 92) * .22;
+            context.strokeStyle = a.particle.tone || b.particle.tone
+              ? 'rgba(183,196,255,' + alpha.toFixed(3) + ')'
+              : 'rgba(213,255,104,' + alpha.toFixed(3) + ')';
+            context.lineWidth = .65;
+            context.beginPath();
+            context.moveTo(a.x, a.y);
+            context.lineTo(b.x, b.y);
+            context.stroke();
+          }
+        }
+
+        points.forEach(({ x, y, particle }) => {
+          context.beginPath();
+          context.arc(x, y, particle.radius, 0, Math.PI * 2);
+          context.fillStyle = particle.tone ? 'rgba(183,196,255,.8)' : 'rgba(213,255,104,.78)';
+          context.fill();
+        });
+
+        scheduleParticles();
+      };
+
+      const scheduleParticles = () => {
+        if (!particleFrame && visible && !document.hidden) {
+          particleFrame = window.requestAnimationFrame(drawParticles);
+        }
+      };
+      const stopParticles = () => {
+        if (particleFrame) window.cancelAnimationFrame(particleFrame);
+        particleFrame = 0;
+        previousTime = 0;
+      };
+      const visibilityObserver = new IntersectionObserver((entries) => {
+        visible = Boolean(entries[0]?.isIntersecting);
+        if (visible) scheduleParticles();
+        else stopParticles();
+      }, { threshold: 0.02 });
+      visibilityObserver.observe(heroArt);
+
+      if ('ResizeObserver' in window) new ResizeObserver(resizeCanvas).observe(heroArt);
+      else window.addEventListener('resize', resizeCanvas, { passive: true });
+      if (finePointer) {
+        heroArt.addEventListener('pointermove', (event) => {
+          const rect = heroArt.getBoundingClientRect();
+          pointerX = event.clientX - rect.left;
+          pointerY = event.clientY - rect.top;
+        }, { passive: true });
+        heroArt.addEventListener('pointerleave', () => {
+          pointerX = -1000;
+          pointerY = -1000;
+        });
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopParticles();
+        else scheduleParticles();
+      });
+      resizeCanvas();
+    }
+  }
+
   if (heroArt && finePointer) {
     heroArt.addEventListener('pointermove', (event) => {
       const pos = setSpot(heroArt, event);
