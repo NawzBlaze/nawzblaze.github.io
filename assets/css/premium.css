@@ -1189,3 +1189,12 @@ a:focus-visible,button:focus-visible { outline-color:#d5ff68;outline-offset:4px;
 @media(prefers-reduced-motion:reduce) {
   .contact-email,.contact-email b { transition:none !important;translate:none !important; }
 }
+
+@media(max-width:760px) {
+  /* Keep the contact illustration as a quiet shape on phones; clipped type
+     near the heading reads like a layout accident at narrow widths. */
+  .contact-orbit { top:22px;right:-82px;width:142px;opacity:.075; }
+  .contact-orbit > span,
+  .contact-orbit > b,
+  .contact-orbit > i { opacity:0; }
+}
