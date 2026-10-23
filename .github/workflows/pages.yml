@@ -20,16 +20,8 @@ jobs:
           node-version: '22'
       - name: Validate JavaScript syntax
         run: node --check assets/js/site.js
-      - name: Check essential files
-        run: |
-          test -f index.html
-          test -f 404.html
-          test -f assets/css/site.css
-          test -f assets/js/site.js
-          test -f assets/images/favicon.svg
-          grep -q 'rel="canonical"' index.html
-          grep -q 'application/ld+json' index.html
-          grep -q 'prefers-reduced-motion' assets/css/site.css
+      - name: Run structural site checks
+        run: python3 scripts/verify-site.py
   deploy:
     if: github.event_name != 'pull_request'
     needs: verify
@@ -39,7 +31,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: \${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
