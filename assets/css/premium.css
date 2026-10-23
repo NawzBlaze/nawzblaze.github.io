@@ -438,3 +438,24 @@ html[data-motion="ready"] [data-reveal].is-visible { opacity: 1; filter: blur(0)
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   html[data-motion="ready"] [data-reveal] { opacity: 1 !important; filter: none !important; transform: none !important; }
 }
+
+
+/* Preserve the one-column reading order on tablet and mobile. */
+@media (max-width: 1080px) {
+  .project, .project-scamcheck, .project-momentwise {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "copy" "visual";
+  }
+}
+@media (max-width: 760px) {
+  .project, .project-scamcheck, .project-momentwise {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "copy" "visual";
+  }
+  .project-copy { height: auto; min-height: 480px; }
+  .project-visual { height: 420px; min-height: 420px; }
+}
+@media (max-width: 375px) {
+  .project-copy { min-height: 480px; }
+  .project-visual { height: 400px; min-height: 400px; }
+}
