@@ -10,7 +10,7 @@ A custom static personal site for **Shahnawaz Hussain**, known online as **Nawz*
 2. **Scam Check** — a second opinion for suspicious messages, links, emails and screenshots, with evidence-based risk signals.
 3. **Momentwise** — an intentional phone-use companion in development, designed to encourage deliberate choices without punitive lockouts.
 
-Each project has its own art direction rather than being forced into repeated cards. The visual studies are original illustrations, not claimed screenshots of live interfaces. Product status is stated directly; no false metrics, testimonials, client logos or release claims are used.
+Each project has its own art direction rather than being forced into repeated cards. The project panels use real homepage captures from the three public product sites, saved as optimized WebP previews. They are timestamped visual snapshots; each product's live URL remains the source of truth. Product status is stated directly; no false metrics, testimonials, client logos or release claims are used.
 
 ## Architecture
 
