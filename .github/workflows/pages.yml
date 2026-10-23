@@ -19,7 +19,9 @@ jobs:
         with:
           node-version: '22'
       - name: Validate JavaScript syntax
-        run: node --check assets/js/site.js
+        run: |
+          node --check assets/js/site.js
+          node --check assets/js/premium.js
       - name: Run structural site checks
         run: python3 scripts/verify-site.py
   deploy:
