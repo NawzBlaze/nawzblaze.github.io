@@ -154,7 +154,7 @@
 
     // Magnetic buttons use the independent CSS translate property, so hover
     // transforms remain composable and no layout is recalculated during scroll.
-    const magnets = document.querySelectorAll('.header-cta,.hero-link,.project-button,.contact-button,.desktop-nav a,.contact-socials a');
+    const magnets = document.querySelectorAll('.header-cta,.hero-link,.project-button,.contact-button,.contact-email,.desktop-nav a,.contact-socials a');
     magnets.forEach((element) => {
       element.classList.add('magnetic-target');
       element.addEventListener('pointermove', (event) => {
