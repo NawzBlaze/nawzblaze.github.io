@@ -193,7 +193,7 @@ def main() -> int:
     if '@media(max-width:960px)' not in css_compact or 'grid-template-areas:"copy""visual"' not in css_compact:
         fail("Tablet and mobile projects must use the deliberate stacked layout.")
     old_scam_rule = css_compact.find(".project-scamcheck{grid-template-columns:minmax(0,1.16fr)minmax(300px,.84fr)")
-    aligned_override = css_compact.rfind(".project-scamcheck,.project-momentwise{grid-template-columns:minmax(0,.86fr)minmax(0,1.14fr)}")
+    aligned_override = css_compact.rfind(".project-scamcheck,.project-momentwise{grid-template-columns:minmax(0,.86fr)minmax(0,1.14fr);")
     if old_scam_rule >= 0 and aligned_override < old_scam_rule:
         fail("Scam Check's old reversed columns must be overridden by the shared project grid.")
 
