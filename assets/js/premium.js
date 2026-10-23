@@ -335,7 +335,7 @@
   // Low-amplitude scroll parallax: four elements, one scheduled frame, transform-only.
   const scrollScenes = [...document.querySelectorAll('.project-visual')].map((visual) => ({
     visual,
-    scene: visual.querySelector('.toolkit-scene, .scam-scene, .moment-scene')
+    scene: visual.querySelector('.live-preview-frame, .toolkit-scene, .scam-scene, .moment-scene')
   })).filter((item) => item.scene);
   let parallaxFrame = 0;
   const updateParallax = () => {
@@ -372,7 +372,7 @@
 
   if (finePointer) {
     document.querySelectorAll('.project-visual').forEach((visual) => {
-      const scene = visual.querySelector('.toolkit-scene, .scam-scene, .moment-scene');
+      const scene = visual.querySelector('.live-preview-frame, .toolkit-scene, .scam-scene, .moment-scene');
       if (!scene) return;
       visual.addEventListener('pointermove', (event) => {
         const pos = setSpot(visual, event);
