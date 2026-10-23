@@ -111,7 +111,7 @@ def check_delimiters(source: str, label: str) -> None:
 def main() -> int:
     required = [
         "index.html", "404.html", "robots.txt", "sitemap.xml",
-        "assets/css/site.css", "assets/js/site.js", "assets/images/favicon.svg",
+        "assets/css/site.css", "assets/css/premium.css", "assets/js/site.js", "assets/js/premium.js", "assets/images/favicon.svg", "assets/images/nawz-mark.svg", "assets/images/nawz-wordmark.svg", "assets/images/og-image.jpg", "assets/previews/formfix.webp", "assets/previews/scamcheck.webp", "assets/previews/momentwise.webp",
     ]
     for relative in required:
         if not (ROOT / relative).is_file():
@@ -150,12 +150,33 @@ def main() -> int:
             fail(f"Broken local asset reference: /{asset}")
 
     title = "".join(parser.title_parts).strip()
-    if not title or "Nawz" not in title:
-        fail("Page title is missing or doesn't contain the public identity.")
+    if not title or "Nawz" not in title or "Shahnawaz Hussain" not in title:
+        fail("Page title must identify Shahnawaz Hussain and the Nawz brand.")
+    if len(title) > 65:
+        fail(f"Page title is over 65 characters ({len(title)}).")
+    if 'name="google-site-verification" content="01omZfSAZVcvwrjPL0O4zI9x9tx9-AXHt6KhZnlq8tw"' not in html:
+        fail("Google Search Console verification meta tag is missing or incorrect.")
+    for required_meta in (
+        'property="og:image" content="https://nawzblaze.github.io/assets/images/og-image.jpg"',
+        'name="twitter:card" content="summary_large_image"',
+        'name="twitter:image" content="https://nawzblaze.github.io/assets/images/og-image.jpg"',
+        'rel="apple-touch-icon"',
+    ):
+        if required_meta not in html:
+            fail("Missing SEO/share metadata: " + required_meta)
+    desc = re.search(r'<meta name="description" content="([^"]+)"', html)
+    if not desc or not 100 <= len(desc.group(1)) <= 165:
+        fail("Meta description should be clear and approximately 100–165 characters.")
+    if html.count('class="live-preview-image"') != 3:
+        fail("All featured projects must display real website screenshot previews.")
     if 'rel="canonical" href="https://nawzblaze.github.io/"' not in html:
         fail("Expected canonical homepage URL is missing.")
     if "application/ld+json" not in html:
         fail("Person structured data is missing.")
+    if not (ROOT / "assets/images/icons/pwa-192.png").is_file() or not (ROOT / "assets/images/icons/pwa-512.png").is_file():
+        fail("PWA PNG icon set is incomplete.")
+    if not (ROOT / "favicon.ico").is_file():
+        fail("Root favicon.ico is missing.")
     if "prefers-reduced-motion:reduce" not in re.sub(r"\s+", "", css):
         fail("Reduced-motion CSS support is missing.")
     if "Flip Trail" in html or "fliptrail" in html.lower():
@@ -168,10 +189,15 @@ def main() -> int:
     try:
         if parser.json_ld_parts:
             schema = json.loads("".join(parser.json_ld_parts))
-            if schema.get("@type") != "Person" or schema.get("name") != "Shahnawaz Hussain":
+            graph = schema.get("@graph", [])
+            person = next((item for item in graph if item.get("@type") == "Person"), schema if schema.get("@type") == "Person" else {})
+            types = {item.get("@type") for item in graph}
+            if person.get("name") != "Shahnawaz Hussain":
                 fail("Person structured data has unexpected identity fields.")
-            if not {"Nawz", "NawzBlaze"}.issubset(set(schema.get("alternateName", []))):
+            if not {"Nawz", "NawzBlaze"}.issubset(set(person.get("alternateName", []))):
                 fail("Person structured data must connect Nawz and NawzBlaze.")
+            if not {"WebSite", "WebPage"}.issubset(types):
+                fail("Structured data should identify the WebSite and WebPage entities.")
         else:
             fail("Structured-data JSON could not be read.")
     except (json.JSONDecodeError, AttributeError) as exc:
@@ -198,6 +224,11 @@ def main() -> int:
         fail("Scam Check's old reversed columns must be overridden by the shared project grid.")
 
     check_delimiters(css, "site.css")
+    premium_css_path = ROOT / "assets/css/premium.css"
+    if premium_css_path.exists():
+        check_delimiters(premium_css_path.read_text(encoding="utf-8"), "premium.css")
+    else:
+        fail("premium.css is missing.")
 
     if ERRORS:
         print("SITE CHECK FAILED")
@@ -209,6 +240,7 @@ def main() -> int:
     print(f" - One h1; {len(parser.ids)} unique IDs; {len(parser.links)} links; {len(parser.asset_refs)} local assets checked")
     print(" - FormFix → Scam Check → Momentwise order confirmed")
     print(" - Structured data, canonical URL, sitemap and robots checked")
+    print(" - Search Console tag, social cards, real product captures and app icons checked")
     print(" - CSS string/comment/delimiter structure balanced")
     return 0
 
