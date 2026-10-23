@@ -17,7 +17,10 @@ Each project has its own art direction rather than being forced into repeated ca
 - \`index.html\` — semantic content, canonical metadata, social metadata and Person structured data.
 - \`assets/css/site.css\` — design tokens, responsive layouts, project-specific visuals and reduced-motion behavior.
 - \`assets/js/site.js\` — accessible mobile navigation, scroll reveals and dynamic footer year.
-- \`assets/images/favicon.svg\` — custom geometric identity mark.
+- \`assets/images/favicon.svg\`, \`assets/images/nawz-mark.svg\` and \`assets/images/nawz-wordmark.svg\` — reusable brand assets.
+- \`assets/images/icons/\` and \`favicon.ico\` — browser, search-result, Apple Touch and PWA icon sizes.
+- \`assets/images/og-image.jpg\` — the 1200×630 social-sharing card.
+- \`assets/previews/\` — optimized captures of the current live product homepages.
 - \`404.html\`, \`robots.txt\`, \`sitemap.xml\` — error recovery and search-engine essentials.
 - \`scripts/verify-site.py\` — dependency-free checks for required content, links, metadata, ordering and CSS structure.
 - \`.github/workflows/pages.yml\` — automated verification and GitHub Pages deployment.
