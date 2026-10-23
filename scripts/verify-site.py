@@ -187,6 +187,14 @@ def main() -> int:
     except (ET.ParseError, OSError) as exc:
         fail(f"Invalid sitemap.xml: {exc}")
 
+    css_compact = re.sub(r"\s+", "", css)
+    if 'grid-template-areas:"copyvisual"' not in css_compact:
+        fail("Desktop projects must share the same copy-left, visual-right grid.")
+    if '@media(max-width:960px)' not in css_compact or 'grid-template-areas:"copy""visual"' not in css_compact:
+        fail("Tablet and mobile projects must use the deliberate stacked layout.")
+    if ".project-scamcheck{grid-template-columns:minmax(0,1.16fr)minmax(300px,.84fr)" in css_compact:
+        fail("Scam Check must not use the old reversed desktop columns.")
+
     check_delimiters(css, "site.css")
 
     if ERRORS:
