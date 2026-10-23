@@ -1000,3 +1000,28 @@ html[data-motion="ready"] .project-copy.motion-children.is-visible > * { opacity
   .hero-word, .eyebrow-star, .moment-note, .moment-sun, .contact-orbit::after, .contact-orbit::before { animation:none !important; }
   .magnetic-target { translate:none !important; }
 }
+
+
+/* Final polish: reveal the section rail after the page starts moving. */
+body.has-scrolled .scene-rail { opacity:1; transform:translate3d(0,-50%,0); }
+.contact-orbit::before { border-style:dashed; }
+.hero-art::after {
+  transform:translate3d(var(--parallax-x,0px),calc(var(--parallax-y,0px) + var(--scroll-y,0px)),0);
+}
+.toolkit-scene,
+.formfix-visual:hover .toolkit-scene,
+.scam-scene,
+.moment-scene {
+  transform:perspective(1100px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))
+    translate3d(var(--move-x,0px),calc(var(--move-y,0px) + var(--scroll-y,0px)),0)
+    rotate(var(--base-rotation,0deg));
+}
+@media (max-width:760px) {
+  .hero-art::after { transform:translate3d(0,var(--scroll-y,0px),0); }
+  .artifact-files { animation-duration:13s; }
+  .artifact-trust { animation-duration:15s; }
+  .artifact-attention { animation-duration:17s; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.has-scrolled .scene-rail { display:none; }
+}
