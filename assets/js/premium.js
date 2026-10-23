@@ -209,7 +209,7 @@
         canvas.width = Math.round(canvasWidth * dpr);
         canvas.height = Math.round(canvasHeight * dpr);
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = Math.max(20, Math.min(48, Math.round(canvasWidth * canvasHeight / 7600)));
+        const count = finePointer ? Math.max(20, Math.min(48, Math.round(canvasWidth * canvasHeight / 7600))) : Math.max(12, Math.min(22, Math.round(canvasWidth * canvasHeight / 10500)));
         particles = Array.from({ length: count }, (_, index) => ({
           x: Math.random() * canvasWidth,
           y: Math.random() * canvasHeight,
@@ -333,15 +333,15 @@
   }
 
   // Low-amplitude scroll parallax: four elements, one scheduled frame, transform-only.
-  const scrollScenes = [...document.querySelectorAll('.project-visual')].map((visual) => ({
+  const scrollScenes = finePointer ? [...document.querySelectorAll('.project-visual')].map((visual) => ({
     visual,
     scene: visual.querySelector('.live-preview-frame, .toolkit-scene, .scam-scene, .moment-scene')
-  })).filter((item) => item.scene);
+  })).filter((item) => item.scene) : [];
   let parallaxFrame = 0;
   const updateParallax = () => {
     parallaxFrame = 0;
     if (document.hidden) return;
-    if (heroArt) {
+    if (heroArt && finePointer) {
       const rect = heroArt.getBoundingClientRect();
       const offset = rect.bottom < -40 || rect.top > window.innerHeight + 40
         ? 0
@@ -363,12 +363,14 @@
     if (parallaxFrame) return;
     parallaxFrame = window.requestAnimationFrame(updateParallax);
   };
-  window.addEventListener('scroll', queueParallax, { passive: true });
-  window.addEventListener('resize', queueParallax, { passive: true });
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) queueParallax();
-  });
-  queueParallax();
+  if (finePointer) {
+    window.addEventListener('scroll', queueParallax, { passive: true });
+    window.addEventListener('resize', queueParallax, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) queueParallax();
+    });
+    queueParallax();
+  }
 
   if (finePointer) {
     document.querySelectorAll('.project-visual').forEach((visual) => {
@@ -380,6 +382,12 @@
         scene.style.setProperty('--tilt-y', (pos.nx * 7).toFixed(2) + 'deg');
         scene.style.setProperty('--move-x', (pos.nx * 7).toFixed(2) + 'px');
         scene.style.setProperty('--move-y', (pos.ny * 5).toFixed(2) + 'px');
+        const previewImage = visual.querySelector('.live-preview-image');
+        if (previewImage) {
+          visual.classList.add('is-pointed');
+          previewImage.style.setProperty('--preview-x', (-pos.nx * 5).toFixed(2) + 'px');
+          previewImage.style.setProperty('--preview-y', (-pos.ny * 4).toFixed(2) + 'px');
+        }
       }, { passive: true });
       visual.addEventListener('pointerleave', () => {
         scene.style.setProperty('--tilt-x', '0deg');
@@ -388,6 +396,12 @@
         scene.style.setProperty('--move-y', '0px');
         visual.style.setProperty('--spot-x', '65%');
         visual.style.setProperty('--spot-y', '30%');
+        const previewImage = visual.querySelector('.live-preview-image');
+        if (previewImage) {
+          visual.classList.remove('is-pointed');
+          previewImage.style.setProperty('--preview-x', '0px');
+          previewImage.style.setProperty('--preview-y', '0px');
+        }
       });
     });
   }
