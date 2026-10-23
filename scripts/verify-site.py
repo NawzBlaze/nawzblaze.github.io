@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""Dependency-free structural checks for the public Nawz portfolio."""
+from html.parser import HTMLParser
+from pathlib import Path
+import json
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[1]
+ERRORS = []
+WARNINGS = []
+
+def fail(message: str) -> None:
+    ERRORS.append(message)
+
+class SiteParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.ids = []
+        self.links = []
+        self.asset_refs = []
+        self.tags = []
+        self.h1_count = 0
+        self.title_parts = []
+        self.in_title = False
+        self.json_ld_parts = []
+        self.in_json_ld = False
+        self.current_script_type = ""
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        self.tags.append((tag, attrs))
+        element_id = attrs.get("id")
+        if element_id:
+            self.ids.append(element_id)
+        if tag == "a" and attrs.get("href"):
+            self.links.append((attrs["href"], attrs.get("target", ""), attrs.get("rel", "")))
+        for key in ("src", "href"):
+            value = attrs.get(key, "")
+            if value.startswith("/assets/"):
+                self.asset_refs.append(value.lstrip("/"))
+        if tag == "h1":
+            self.h1_count += 1
+        if tag == "title":
+            self.in_title = True
+        if tag == "script" and attrs.get("type") == "application/ld+json":
+            self.in_json_ld = True
+            self.current_script_type = attrs.get("type", "")
+
+    def handle_endtag(self, tag):
+        if tag == "title":
+            self.in_title = False
+        if tag == "script" and self.in_json_ld:
+            self.in_json_ld = False
+            self.current_script_type = ""
+
+    def handle_data(self, data):
+        if self.in_title:
+            self.title_parts.append(data)
+        if self.in_json_ld:
+            self.json_ld_parts.append(data)
+
+def check_delimiters(source: str, label: str) -> None:
+    pairs = {"(": ")", "[": "]", "{": "}"}
+    stack = []
+    quote = None
+    escaped = False
+    comment = False
+    i = 0
+    while i < len(source):
+        char = source[i]
+        nxt = source[i + 1] if i + 1 < len(source) else ""
+        if comment:
+            if char == "*" and nxt == "/":
+                comment = False
+                i += 2
+                continue
+            i += 1
+            continue
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            i += 1
+            continue
+        if char == "/" and nxt == "*":
+            comment = True
+            i += 2
+            continue
+        if char in ("'", '"'):
+            quote = char
+        elif char in pairs:
+            stack.append((char, i))
+        elif char in ")]}":
+            if not stack or pairs[stack[-1][0]] != char:
+                fail(f"{label}: unmatched closing delimiter {char!r} at offset {i}")
+                return
+            stack.pop()
+        i += 1
+    if quote:
+        fail(f"{label}: unclosed string")
+    if comment:
+        fail(f"{label}: unclosed comment")
+    if stack:
+        fail(f"{label}: unclosed delimiter {stack[-1][0]!r} at offset {stack[-1][1]}")
+
+def main() -> int:
+    required = [
+        "index.html", "404.html", "robots.txt", "sitemap.xml",
+        "assets/css/site.css", "assets/js/site.js", "assets/images/favicon.svg",
+    ]
+    for relative in required:
+        if not (ROOT / relative).is_file():
+            fail(f"Required file missing: {relative}")
+
+    index_path = ROOT / "index.html"
+    css_path = ROOT / "assets/css/site.css"
+    if not index_path.exists() or not css_path.exists():
+        print("Required source files are missing.")
+        return 1
+
+    html = index_path.read_text(encoding="utf-8")
+    css = css_path.read_text(encoding="utf-8")
+    parser = SiteParser()
+    parser.feed(html)
+    parser.close()
+
+    if parser.h1_count != 1:
+        fail(f"Expected exactly one h1, found {parser.h1_count}")
+    if len(parser.ids) != len(set(parser.ids)):
+        duplicates = sorted({item for item in parser.ids if parser.ids.count(item) > 1})
+        fail("Duplicate HTML IDs: " + ", ".join(duplicates))
+
+    for anchor in ("main", "top", "work", "about", "contact", "formfix-title", "scamcheck-title", "momentwise-title"):
+        if anchor not in parser.ids:
+            fail(f"Expected target id missing: {anchor}")
+
+    for href, target, rel in parser.links:
+        if href.startswith("#") and href[1:] not in parser.ids:
+            fail(f"Broken in-page anchor: {href}")
+        if target == "_blank" and not {"noopener", "noreferrer"}.issubset(set(rel.split())):
+            fail(f"External new-tab link lacks noopener/noreferrer: {href}")
+
+    for asset in parser.asset_refs:
+        if not (ROOT / asset).is_file():
+            fail(f"Broken local asset reference: /{asset}")
+
+    title = "".join(parser.title_parts).strip()
+    if not title or "Nawz" not in title:
+        fail("Page title is missing or doesn't contain the public identity.")
+    if 'rel="canonical" href="https://nawzblaze.github.io/"' not in html:
+        fail("Expected canonical homepage URL is missing.")
+    if "application/ld+json" not in html:
+        fail("Person structured data is missing.")
+    if "prefers-reduced-motion:reduce" not in re.sub(r"\s+", "", css):
+        fail("Reduced-motion CSS support is missing.")
+    if "Flip Trail" in html or "fliptrail" in html.lower():
+        fail("Removed project Flip Trail still appears in the homepage source.")
+
+    ordered_titles = [html.find('id="formfix-title"'), html.find('id="scamcheck-title"'), html.find('id="momentwise-title"')]
+    if any(position < 0 for position in ordered_titles) or ordered_titles != sorted(ordered_titles):
+        fail("Featured projects must appear in this order: FormFix, Scam Check, Momentwise.")
+
+    try:
+        if parser.json_ld_parts:
+            schema = json.loads("".join(parser.json_ld_parts))
+            if schema.get("@type") != "Person" or schema.get("name") != "Shahnawaz Hussain":
+                fail("Person structured data has unexpected identity fields.")
+            if not {"Nawz", "NawzBlaze"}.issubset(set(schema.get("alternateName", []))):
+                fail("Person structured data must connect Nawz and NawzBlaze.")
+        else:
+            fail("Structured-data JSON could not be read.")
+    except (json.JSONDecodeError, AttributeError) as exc:
+        fail(f"Invalid structured-data JSON: {exc}")
+
+    robots_path = ROOT / "robots.txt"
+    if robots_path.exists() and "https://nawzblaze.github.io/sitemap.xml" not in robots_path.read_text(encoding="utf-8"):
+        fail("robots.txt must point to the canonical sitemap.")
+    try:
+        sitemap = ET.parse(ROOT / "sitemap.xml").getroot()
+        if not sitemap.tag.endswith("urlset") or not any(node.text == "https://nawzblaze.github.io/" for node in sitemap.iter() if node.tag.endswith("loc")):
+            fail("sitemap.xml must include the canonical homepage.")
+    except (ET.ParseError, OSError) as exc:
+        fail(f"Invalid sitemap.xml: {exc}")
+
+    check_delimiters(css, "site.css")
+
+    if ERRORS:
+        print("SITE CHECK FAILED")
+        for error in ERRORS:
+            print(" - " + error)
+        return 1
+
+    print("SITE CHECK PASSED")
+    print(f" - One h1; {len(parser.ids)} unique IDs; {len(parser.links)} links; {len(parser.asset_refs)} local assets checked")
+    print(" - FormFix → Scam Check → Momentwise order confirmed")
+    print(" - Structured data, canonical URL, sitemap and robots checked")
+    print(" - CSS string/comment/delimiter structure balanced")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
