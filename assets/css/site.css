@@ -342,3 +342,113 @@ html[data-motion="ready"] [data-reveal].is-visible{opacity:1;transform:translate
  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
  [data-reveal]{opacity:1!important;transform:none!important}
 }
+
+/* -----------------------------------------------------------
+   Layout refinement: one editorial grid, consistent project
+   geometry, and a deliberate tablet breakpoint.
+   ----------------------------------------------------------- */
+.project{
+  grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+  grid-template-areas:"copy visual";
+  align-items:stretch;
+  gap:0;
+}
+.project-copy{
+  grid-area:copy;
+  min-height:clamp(540px,42.4vw,620px);
+  padding:clamp(30px,3vw,44px);
+}
+.project-visual{
+  grid-area:visual;
+  min-height:clamp(540px,42.4vw,620px);
+}
+.project-scamcheck,
+.project-momentwise{
+  grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+}
+.project-overline{
+  margin:clamp(28px,3vw,43px) 0 12px;
+}
+.project-description{
+  margin-top:18px;
+  line-height:1.78;
+}
+.project-copy h3{
+  font-size:clamp(42px,4.8vw,64px);
+}
+.moment-principles{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;
+  gap:6px;
+  width:100%;
+  margin:21px 0 23px;
+}
+.moment-principles span{
+  display:flex;
+  align-items:center;
+  min-height:34px;
+  padding:7px 8px;
+  font-size:7px;
+  line-height:1.35;
+}
+.moment-principles span:last-child{grid-column:1/-1}
+.project-copy .project-button{margin-top:auto}
+.project-copy--scamcheck .project-caveat{margin-top:12px}
+.project-copy--momentwise .project-description{margin-top:18px}
+.project-copy--momentwise .project-text-link{margin-top:12px}
+.project-copy--momentwise .moment-status-note{margin-top:12px}
+
+@media(max-width:960px){
+  .project{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"copy" "visual";
+    margin-bottom:44px;
+  }
+  .project-copy{
+    min-height:0;
+    padding:34px 30px 32px;
+  }
+  .project-visual{min-height:clamp(420px,58vw,520px)}
+  .project-overline{margin:31px 0 12px}
+  .project-copy h3{font-size:clamp(42px,7vw,66px)}
+  .moment-principles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .moment-principles span:last-child{grid-column:auto}
+}
+
+@media(max-width:760px){
+  .project{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"copy" "visual";
+    margin-bottom:42px;
+  }
+  .project-copy{
+    min-height:0;
+    padding:24px 22px 26px;
+  }
+  .project-visual{min-height:420px}
+  .project-overline{margin:31px 0 12px}
+  .project-copy h3{font-size:clamp(43px,11vw,67px)}
+  .moment-principles{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    margin:18px 0 20px;
+  }
+  .moment-principles span{
+    min-height:30px;
+    padding:5px 6px;
+    font-size:6px;
+    letter-spacing:-.02em;
+  }
+  .moment-principles span:last-child{grid-column:1/-1}
+  .project-copy--momentwise .project-description{margin-top:18px}
+  .project-copy--momentwise .project-text-link{margin-top:11px}
+  .project-copy--momentwise .moment-status-note{margin-top:10px}
+  .project-copy--scamcheck .project-caveat{margin-top:10px}
+}
+@media(max-width:375px){
+  .project-copy{padding:22px 18px 24px}
+  .project-visual{min-height:400px}
+  .moment-principles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .moment-principles span{font-size:6px}
+}
