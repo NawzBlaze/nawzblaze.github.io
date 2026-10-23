@@ -181,7 +181,7 @@ def main() -> int:
         fail("Unrequested education/qualification details must not appear on the public site.")
     if "application/ld+json" not in html:
         fail("Person structured data is missing.")
-    if not (ROOT / "assets/images/icons/favicon-48.png", "assets/images/icons/favicon-64.png", "assets/images/icons/pwa-192.png").is_file() or not (ROOT / "assets/images/icons/pwa-512.png").is_file():
+    if any(not (ROOT / item).is_file() for item in ("assets/images/icons/favicon-48.png", "assets/images/icons/favicon-64.png", "assets/images/icons/pwa-192.png", "assets/images/icons/pwa-512.png")):
         fail("PWA PNG icon set is incomplete.")
     if not (ROOT / "favicon.ico").is_file():
         fail("Root favicon.ico is missing.")
