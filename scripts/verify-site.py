@@ -171,9 +171,17 @@ def main() -> int:
         fail("All featured projects must display real website screenshot previews.")
     if 'rel="canonical" href="https://nawzblaze.github.io/"' not in html:
         fail("Expected canonical homepage URL is missing.")
+    if 'href="/favicon.ico"' not in html or 'href="/assets/images/icons/favicon-64.png"' not in html:
+        fail("Search-friendly ICO and high-resolution PNG favicon links are required.")
+    if 'mailto:nawzblaze.support@gmail.com' not in html or 'https://www.reddit.com/user/nawzblaze/' not in html:
+        fail("The secondary email and Reddit profile links are required.")
+    if "A good idea isn’t finished when the screenshot looks good." in html:
+        fail("Generic screenshot-first copy must not return to the About section.")
+    if re.search(r"\b(education qualification|class 9|class 8|school details)\b", html, re.I):
+        fail("Unrequested education/qualification details must not appear on the public site.")
     if "application/ld+json" not in html:
         fail("Person structured data is missing.")
-    if not (ROOT / "assets/images/icons/pwa-192.png").is_file() or not (ROOT / "assets/images/icons/pwa-512.png").is_file():
+    if not (ROOT / "assets/images/icons/favicon-48.png", "assets/images/icons/favicon-64.png", "assets/images/icons/pwa-192.png").is_file() or not (ROOT / "assets/images/icons/pwa-512.png").is_file():
         fail("PWA PNG icon set is incomplete.")
     if not (ROOT / "favicon.ico").is_file():
         fail("Root favicon.ico is missing.")
@@ -196,6 +204,10 @@ def main() -> int:
                 fail("Person structured data has unexpected identity fields.")
             if not {"Nawz", "NawzBlaze"}.issubset(set(person.get("alternateName", []))):
                 fail("Person structured data must connect Nawz and NawzBlaze.")
+            if "nawzblaze.support@gmail.com" != person.get("email"):
+                fail("Person structured data email must match the published contact email.")
+            if "https://www.reddit.com/user/nawzblaze/" not in person.get("sameAs", []):
+                fail("Person structured data must include the published Reddit profile.")
             if not {"WebSite", "WebPage"}.issubset(types):
                 fail("Structured data should identify the WebSite and WebPage entities.")
         else:
@@ -208,8 +220,11 @@ def main() -> int:
         fail("robots.txt must point to the canonical sitemap.")
     try:
         sitemap = ET.parse(ROOT / "sitemap.xml").getroot()
-        if not sitemap.tag.endswith("urlset") or not any(node.text == "https://nawzblaze.github.io/" for node in sitemap.iter() if node.tag.endswith("loc")):
+        sitemap_urls = {node.text for node in sitemap.iter() if node.tag.endswith("loc")}
+        if not sitemap.tag.endswith("urlset") or "https://nawzblaze.github.io/" not in sitemap_urls:
             fail("sitemap.xml must include the canonical homepage.")
+        if "https://nawzblaze.github.io/momentwise/" not in sitemap_urls:
+            fail("sitemap.xml should include the public Momentwise landing page.")
     except (ET.ParseError, OSError) as exc:
         fail(f"Invalid sitemap.xml: {exc}")
 
